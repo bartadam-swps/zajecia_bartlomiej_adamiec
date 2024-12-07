@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'folder_aplikacji', #folder_aplikacji.app.FolderAplikacjiConfig
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
