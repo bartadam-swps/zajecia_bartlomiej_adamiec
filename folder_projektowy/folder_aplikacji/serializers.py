@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Person, Team, MONTHS, SHIRT_SIZES, Stanowisko, Osoba, Team
+from datetime import date
 
 
 class PersonSerializer(serializers.Serializer):
@@ -15,7 +16,7 @@ class PersonSerializer(serializers.Serializer):
     # w pliku models.py SHIRT_SIZES oraz MONTHS zostały wyniesione jako stałe do poziomu zmiennych skryptu
     # (nie wewnątrz modelu)
     shirt_size = serializers.ChoiceField(choices=SHIRT_SIZES, default=SHIRT_SIZES[0][0])
-    miesiac_dodania = serializers.ChoiceField(choices=MONTHS.choices, default=MONTHS.choices[0][0])
+    month_added = serializers.ChoiceField(choices=MONTHS.choices, default=MONTHS.choices[0][0])
 
     # odzwierciedlenie pola w postaci klucza obcego
     # przy dodawaniu nowego obiektu możemy odwołać się do istniejącego poprzez inicjalizację nowego obiektu
@@ -31,12 +32,22 @@ class PersonSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.shirt_size = validated_data.get('shirt_size', instance.shirt_size)
-        instance.miesiac_dodania = validated_data.get('miesiac_dodania', instance.miesiac_dodania)
+        instance.month_added = validated_data.get('month_added', instance.month_added)
         instance.pseudonim = validated_data.get('pseudonim' , instance.pseudonim)
         instance.team = validated_data.get('team', instance.team)
         instance.save()
         return instance
     
+    # fragment klasy PersonSerializer
+
+# walidacja wartości pola name
+    def validate_name(self, value):
+
+        if not value.istitle():
+            raise serializers.ValidationError(
+                "Nazwa osoby powinna rozpoczynać się wielką literą!",
+            )
+        return value
     
 # class PersonModelSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -44,12 +55,12 @@ class PersonSerializer(serializers.Serializer):
 #         model = Person
 #         # definiując poniższe pole możemy określić listę właściwości modelu,
 #         # które chcemy serializować
-#         fields = ['id', 'name', 'miesiac_dodania', 'shirt_size', 'team', 'pseudonim']
+#         fields = ['id', 'name', 'month_added', 'shirt_size', 'team', 'pseudonim']
 #         # definicja pola modelu tylko do odczytu
 #         read_only_fields = ['id']
 
 class StanowiskoSerializer(serializers.Serializer):
-    
+    id = serializers.IntegerField(read_only=True)
     nazwa = serializers.CharField(max_length = 80)
     opis = serializers.CharField()
     
@@ -69,6 +80,21 @@ class TeamSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
     
 class OsobaSerializer(serializers.ModelSerializer):
+    def validate_imie(self, value):
+        if not value.isalpha():
+            raise serializers.ValidationError("Polse imie ma zawierać tylko litery")
+        return value
+    
+    def validate_nazwisko(self, value):
+        if not value.isalpha():
+            raise serializers.ValidationError("Polse nazwisko ma zawierać tylko litery")
+        return value
+    
+    def validate_data_dodania(self, value):
+        if value > date.today():
+            raise serializers.ValidationError('Pole data_doanie nie może być z przyszłości')
+        return value
+    
     class Meta:
         model = Osoba
         fields = ['id', 'imie', 'nazwisko', 'plec', 'stanowisko', 'data_dodania']
