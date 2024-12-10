@@ -9,4 +9,9 @@ urlpatterns = [
     path('osoby/search/<str:substring>/', views.osoba_search),
     path('stanowiska/', views.stanowisko_list),
     path('stanowiska/<int:pk>', views.stanowisko_detail),
+    path('welcome/', views.welcome_view),
+    path('persons_html/', views.person_list_html),
+    path('person/<int:id>', views.person_detail_html),
+    path('team_html/', views.team_list_html),
+    path('team/<int:id>/', views.team_detail_html),
     ]

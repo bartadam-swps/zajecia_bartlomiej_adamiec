@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Person, Team, Osoba, Stanowisko
 from .serializers import PersonSerializer, OsobaSerializer, StanowiskoSerializer
+from django.http import Http404, HttpResponse
+import datetime
 
 # określamy dostępne metody żądania dla tego endpointu
 @api_view(['GET'])
@@ -119,3 +121,52 @@ def stanowisko_detail(request, pk):
     elif request.method == 'DELETE':
         stanowisko.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# kod umieszczamy w pliku views.py wybranej aplikacji
+
+
+
+def welcome_view(request):
+    now = datetime.datetime.now()
+    html = f"""
+        <html><body>
+        Witaj użytkowniku! </br>
+        Aktualna data i czas na serwerze: {now}.
+        </body></html>"""
+    return HttpResponse(html)
+
+def person_list_html(request):
+        persons = Person.objects.all()
+        return render(request,
+                  "folder_aplikacji/person/list.html",
+                  {'persons': persons})
+
+def person_detail_html(request, id):
+    # pobieramy konkretny obiekt Person
+    try:
+        person = Person.objects.get(id=id)
+    except Person.DoesNotExist:
+        raise Http404("Obiekt Person o podanym id nie istnieje")
+
+    return render(request,
+                  "folder_aplikacji/person/detail.html",
+                  {'person': person})
+
+def team_list_html(request):
+    team = Team.objects.all()
+    return render(request,
+                  "folder_aplikacji/team/team_list.html",
+                  {'team': team})
+
+
+def team_detail_html(request, id):
+   
+    team = get_object_or_404(Team, id=id)
+    return render(
+        request,
+        "folder_aplikacji/team/team_detail.html",
+        {'team': team}
+    )
+
+
