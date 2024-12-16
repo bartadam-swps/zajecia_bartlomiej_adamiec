@@ -1,5 +1,5 @@
 body{
-    background-image: url('pictures\pudzian.jpg');
+    background-image: url('/static/pictures/pudzian.jpg');
     background-size: cover; 
     background-position: center center;  
     background-repeat: no-repeat; 
