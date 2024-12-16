@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import Person, Team, Osoba, Stanowisko
 from .serializers import PersonSerializer, OsobaSerializer, StanowiskoSerializer
 from django.http import Http404, HttpResponse
@@ -199,3 +200,17 @@ def team_detail_html(request, id):
     )
 
 
+class StanowiskoMemberView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+
+    def get(self, request, pk):
+        try:
+            stanowisko = Stanowisko.objects.get(pk=pk)
+        except Stanowisko.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        osoby = Osoba.objects.filter(stanowisko=stanowisko)
+        serialzer = OsobaSerializer(osoby, many = True)
+        return Response(serialzer.data)
