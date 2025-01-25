@@ -9,7 +9,8 @@ from .models import Person, Team, Osoba, Stanowisko
 from .serializers import PersonSerializer, OsobaSerializer, StanowiskoSerializer
 from django.http import Http404, HttpResponse
 import datetime
-
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.decorators import permission_required
 # określamy dostępne metody żądania dla tego endpointu
 @api_view(['GET'])
 def person_list(request):
@@ -26,6 +27,7 @@ def person_list(request):
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@permission_required('folder_aplikacji.view_person')
 def person_detail(request, pk):
 
     """
@@ -33,6 +35,7 @@ def person_detail(request, pk):
     :param pk: id obiektu Person
     :return: Response (with status and/or object/s data)
     """
+                
     try:
         person = Person.objects.get(pk=pk)
     except Person.DoesNotExist:
@@ -87,7 +90,10 @@ def person_delete(request, pk):
 @permission_classes([IsAuthenticated])
 def osoba_list(request):
     if request.method == 'GET':
-        osoby = Osoba.objects.filter(wlasciciel = request.user)
+        if not request.user.has_perm('view_other_person'):
+            osoby = Osoba.objects.filter(wlasciciel = request.user)
+        else:
+            osoby = Osoba.objects.all()
         serializer = OsobaSerializer(osoby, many = True)
         return Response(serializer.data)
     if request.method == 'POST':
@@ -172,8 +178,11 @@ def person_list_html(request):
                   "folder_aplikacji/person/list.html",
                   {'persons': persons})
 
+
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def person_detail_html(request, id):
-    # pobieramy konkretny obiekt Person
+
     try:
         person = Person.objects.get(id=id)
     except Person.DoesNotExist:

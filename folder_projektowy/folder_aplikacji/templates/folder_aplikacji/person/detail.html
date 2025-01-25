@@ -3,8 +3,13 @@
 {% block title %}{{ person.name }}{% endblock %}
 
 {% block content %}
-<p>Person: {{ person.firstname }} {{ person.lastname }}</p>
+<p>Person: {{ person.name }}</p>
 <p>Rozmiar koszuli: {{ person.shirt_size }}</p>
 <p>Miesiąc dodania: {{ person.month_added }}</p>
 <p>Drużyna: {{ person.team.name }}</p>
+
+{% if perms %}
+<button>Delete</button>
+{% endif %}
+
 {% endblock %}

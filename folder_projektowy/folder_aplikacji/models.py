@@ -54,6 +54,9 @@ class Osoba(models.Model):
     
     class Meta:
         ordering = ["nazwisko"]
+        permissions = [
+            ("view_other_person", "Może zobaczyć osoby innych właściceli"),
+        ]
     
 class Stanowisko(models.Model):
     nazwa = models.CharField(max_length=80, blank=False, null=False)
